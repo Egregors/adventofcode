@@ -39,7 +39,7 @@ if __name__ == '__main__':
     assert solve_captcha_2('123123') == 12
     assert solve_captcha_2('12131415') == 4
 
-    # problem
+    # problems
     f = open("input.txt").readline()
     print('part 1: {}'.format(solve_captcha(f)))
     print('part 2: {}'.format(solve_captcha_2(f)))
