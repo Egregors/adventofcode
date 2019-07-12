@@ -1,8 +1,5 @@
 // https://adventofcode.com/2015/day/3
 
-import { readFileSync } from "fs";
-
-export const getFile = path => readFileSync(`${__dirname}/${path}`, "utf8");
 // ---
 const getLastPoint = arr => arr[arr.length - 1];
 const getX = point => parseInt(point.split(":")[0]);

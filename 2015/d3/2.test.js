@@ -1,8 +1,7 @@
-import {
-    getHousesNumberForSanta,
-    getHousesNumberForSantaAndRobot,
-    getFile
-} from "./2";
+import { getHousesNumberForSanta, getHousesNumberForSantaAndRobot } from "./2";
+
+import { readFileSync } from "fs";
+export const getFile = path => readFileSync(`${__dirname}/${path}`, "utf8");
 
 test("d3 p1", () => {
     expect(getHousesNumberForSanta(">")).toBe(2);
