@@ -158,6 +158,7 @@ func main() {
 			fmt.Printf("\rOn %d sec", startSec)
 		} else {
 			fmt.Println(scr)
+			fmt.Println("On", startSec, "sec")
 			wait()
 		}
 		startSec++
