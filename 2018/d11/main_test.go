@@ -50,24 +50,19 @@ func TestRack_getPowerLvl(t *testing.T) {
 }
 
 func TestGrid_getBestTotalPower(t *testing.T) {
-	type fields struct {
-		g      [300][300]Rack
-		serial int
-	}
 	tests := []struct {
-		name   string
-		fields fields
-		wantX  int
-		wantY  int
+		name      string
+		serial    int
+		wantX     int
+		wantY     int
+		wantPower int
 	}{
-		// TODO: Add test cases.
+		{"18", 18, 33, 45, 29},
+		{"42", 42, 21, 61, 30},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := &Grid{
-				g:      tt.fields.g,
-				serial: tt.fields.serial,
-			}
+			g := NewGrid(tt.serial)
 			gotX, gotY := g.getBestTotalPower()
 			if gotX != tt.wantX {
 				t.Errorf("getBestTotalPower() gotX = %v, want %v", gotX, tt.wantX)

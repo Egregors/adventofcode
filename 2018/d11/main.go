@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -47,21 +48,35 @@ func (r *Rack) genID() int {
 	return r.x + 10
 }
 
+type PowerGroup struct {
+	x, y  int
+	power int
+}
+
+func NewPowerGroup(x int, y int, power int) *PowerGroup {
+	return &PowerGroup{x: x, y: y, power: power}
+}
+
 type Grid struct {
 	g      [300][300]*Rack
 	serial int
+
+	powerGroups []*PowerGroup
 }
 
 func (g *Grid) getBestTotalPower() (x, y int) {
 	g.getPowerForAllCells()
-
-	// todo: this
-	return 0, 0
+	g.makePowerGroups()
+	sort.Slice(g.powerGroups, func(i, j int) bool {
+		return g.powerGroups[i].power > g.powerGroups[j].power
+	})
+	bestGroup := g.powerGroups[0]
+	return bestGroup.x, bestGroup.y
 }
 
 func (g *Grid) getPowerForAllCells() {
-	for i := 1; i <= 300; i++ {
-		for j := 1; j <= 300; j++ {
+	for i := 0; i < 300; i++ {
+		for j := 0; j < 300; j++ {
 			r := NewRack(g.serial, i, j)
 			r.getPowerLvl()
 			g.g[i][j] = r
@@ -69,11 +84,42 @@ func (g *Grid) getPowerForAllCells() {
 	}
 }
 
+func (g *Grid) makePowerGroups() {
+	for i := 0; i < 298; i++ {
+		for j := 0; j < 298; j++ {
+			pg := NewPowerGroup(i, j, g.getPowerGroupLvl(i, j))
+			g.powerGroups = append(g.powerGroups, pg)
+		}
+	}
+}
+
+func (g *Grid) getPowerGroupLvl(x int, y int) int {
+	pwr := 0
+	for i := x; i <= x+2; i++ {
+		for j := y; j <= y+2; j++ {
+			pwr += g.g[i][j].power
+		}
+	}
+	return pwr
+}
+
 func NewGrid(serial int) *Grid {
-	return &Grid{serial: serial}
+	g := &Grid{serial: serial}
+	//g.g = [300][300]*Rack{}
+	return g
 }
 
 func main() {
-	g := NewGrid(18)
+	g := NewGrid(2866)
 	fmt.Println(g.getBestTotalPower())
 }
+
+//	1 2 3 4 5 6 7 8 9
+//	2 . . . . . . . .
+//	3 . . . . . . . .
+//	4 . . . . . . . .
+//	5 . . . . . . . .
+//	6 . . . . . . . .
+//	7 . . . . . . . .
+//	8 . . . . . . . .
+//	9 . . . . . . . .
