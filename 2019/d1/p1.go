@@ -9,7 +9,11 @@ import (
 )
 
 func getFuel(mass int) int {
-	return mass/3 - 2
+	m := mass/3 - 2
+	if m <= 0 {
+		return 0
+	}
+	return m + getFuel(m)
 }
 
 func main() {

@@ -103,5 +103,10 @@ input =
   , 79702
   ]
 
+-- p1
 getFuelAmount :: [Int] -> Int
-getFuelAmount xs = sum [ getFuel x | x <- xs ] where getFuel x = x `div` 3 - 2
+getFuelAmount xs = sum [ getFuel x | x <- xs ]
+ where
+  getFuel x | m <= 0    = 0
+            | otherwise = m + getFuel m
+    where m = x `div` 3 - 2
