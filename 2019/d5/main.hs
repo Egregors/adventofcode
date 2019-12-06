@@ -5,7 +5,7 @@ import           Data.Time
 main :: IO ()
 main = do
   start <- getCurrentTime
-  print $ snd $ opApply 0 1 (code, [])
+  print $ snd $ f 5 code
   end <- getCurrentTime
   print (diffUTCTime end start)
 
@@ -702,33 +702,83 @@ opApply position input xss = f op input xss
   arg2   = position + 2
   arg3   = position + 3
 
-  f '1' input (xs, output) = opApply (position + 4) input (newXs, output)
+  -- a + b -> c
+  f '1' input (xs, output) = opApply newCursorPosition input (newXs, output)
    where
+    newCursorPosition =
+      if newValPosition == position then position else position + 4
     newXs = take newValPosition xs ++ newVal : drop (newValPosition + 1) xs
     newVal         = a + b
     a              = if arg1Mode == '0' then xs !! (xs !! arg1) else xs !! arg1
     b              = if arg2Mode == '0' then xs !! (xs !! arg2) else xs !! arg2
     newValPosition = xs !! arg3
 
-  f '2' input (xs, output) = opApply (position + 4) input (newXs, output)
+  -- a * b -> c
+  f '2' input (xs, output) = opApply newCursorPosition input (newXs, output)
    where
+    newCursorPosition =
+      if newValPosition == position then position else position + 4
     newXs = take newValPosition xs ++ newVal : drop (newValPosition + 1) xs
     newVal         = a * b
     a              = if arg1Mode == '0' then xs !! (xs !! arg1) else xs !! arg1
     b              = if arg2Mode == '0' then xs !! (xs !! arg2) else xs !! arg2
     newValPosition = xs !! arg3
 
-
-  f '3' input (xs, output) = opApply (position + 2) input (newXs, output)
+  -- imp -> a
+  f '3' input (xs, output) = opApply newCursorPosition input (newXs, output)
    where
+    newCursorPosition =
+      if newValPosition == position then position else position + 2
     newXs = take newValPosition xs ++ input : drop (newValPosition + 1) xs
     newValPosition = xs !! arg1
 
+  -- a -> out
   f '4' input (xs, output) = opApply (position + 2) input (xs, newOutput)
     where newOutput = output ++ [xs !! (xs !! arg1)]
+
+  -- a /= 0 -> mv b : _
+  f '5' input (xs, output) = if a /= 0
+    then opApply b input (xs, output)
+    else opApply (position + 3) input (xs, output)
+   where
+    a = if arg1Mode == '0' then xs !! (xs !! arg1) else xs !! arg1
+    b = if arg2Mode == '0' then xs !! (xs !! arg2) else xs !! arg2
+
+  -- a == 0 -> mv b
+  f '6' input (xs, output) = if a == 0
+    then opApply b input (xs, output)
+    else opApply (position + 3) input (xs, output)
+   where
+    a = if arg1Mode == '0' then xs !! (xs !! arg1) else xs !! arg1
+    b = if arg2Mode == '0' then xs !! (xs !! arg2) else xs !! arg2
+
+  -- a < b -> c(1) : c(0)
+  f '7' input (xs, output) = opApply newCursorPosition input (newXs, output)
+   where
+    newXs = take newValPosition xs ++ newVal : drop ((xs !! arg3) + 1) xs
+    newCursorPosition =
+      if newValPosition == position then position else position + 4
+    newValPosition = xs !! arg3
+    newVal         = if a < b then 1 else 0
+    a              = if arg1Mode == '0' then xs !! (xs !! arg1) else xs !! arg1
+    b              = if arg2Mode == '0' then xs !! (xs !! arg2) else xs !! arg2
+
+    -- a == b -> c(1) : c(0)
+  f '8' input (xs, output) = opApply newCursorPosition input (newXs, output)
+   where
+    newXs = take (xs !! arg3) xs ++ newVal : drop ((xs !! arg3) + 1) xs
+    newCursorPosition =
+      if newValPosition == position then position else position + 4
+    newValPosition = xs !! arg3
+    newVal         = if a == b then 1 else 0
+    a              = if arg1Mode == '0' then xs !! (xs !! arg1) else xs !! arg1
+    b              = if arg2Mode == '0' then xs !! (xs !! arg2) else xs !! arg2
 
   f _ input xss = xss
 
 
 normalizeOpcode [a, b, c, d, e] = [a, b, c, d, e]
 normalizeOpcode n               = normalizeOpcode $ '0' : n
+
+f :: Int -> [Int] -> ([Int], [Int])
+f i l = opApply 0 i (l, [])
